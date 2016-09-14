@@ -202,6 +202,10 @@ class HTTPClient(object):
         cookies = merge_cookies(self._cookiejar, cookies)
         wrapped_agent = CookieAgent(self._agent, cookies)
 
+        auth = kwargs.get('auth')
+        if auth:
+            wrapped_agent = add_auth(wrapped_agent, auth)
+
         if kwargs.get('allow_redirects', True):
             if kwargs.get('browser_like_redirects', False):
                 wrapped_agent = BrowserLikeRedirectAgent(wrapped_agent)
@@ -210,10 +214,6 @@ class HTTPClient(object):
 
         wrapped_agent = ContentDecoderAgent(wrapped_agent,
                                             [(b'gzip', GzipDecoder)])
-
-        auth = kwargs.get('auth')
-        if auth:
-            wrapped_agent = add_auth(wrapped_agent, auth)
 
         d = wrapped_agent.request(
             method, url, headers=headers,
